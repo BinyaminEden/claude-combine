@@ -18,17 +18,21 @@ claude --plugin-dir ~/Documents/personal/claude-combine
 
 ## What's Included
 
-### Skills (35)
+### Skills (39)
 
 **From superpowers (14):** brainstorming, writing-plans, executing-plans, test-driven-development, systematic-debugging, requesting-code-review, receiving-code-review, dispatching-parallel-agents, subagent-driven-development, using-git-worktrees, finishing-a-development-branch, verification-before-completion, using-superpowers, writing-skills
 
 **From everything-claude-code (21):** deep-research, strategic-compact, continuous-learning, continuous-learning-v2, api-design, database-migrations, docker-patterns, mcp-server-patterns, security-review, security-scan, frontend-patterns, backend-patterns, postgres-patterns, prompt-optimizer, deployment-patterns, e2e-testing, coding-standards, python-patterns, python-testing, java-coding-standards, jpa-patterns
 
-### Agents (11)
+**Custom/New (4):** content-engine, crosspost, investor-materials, team-builder
+
+### Agents (13)
 
 **From superpowers:** code-reviewer
 
 **From everything-claude-code:** architect, security-reviewer, database-reviewer, build-error-resolver, refactor-cleaner, doc-updater, e2e-runner, java-build-resolver, java-reviewer, python-reviewer
+
+**Custom/New:** chief-of-staff, loop-operator
 
 ### Commands (18)
 
