@@ -1,0 +1,24 @@
+{
+  "name": "claude-combine",
+  "description": "Unified Claude Code plugin merging superpowers workflows (TDD, debugging, planning) with everything-claude-code productivity (agents, learning, hooks, rules)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Eden Bi"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "skills",
+    "agents",
+    "hooks",
+    "rules",
+    "tdd",
+    "debugging",
+    "code-review",
+    "planning",
+    "workflows",
+    "continuous-learning",
+    "security",
+    "best-practices"
+  ]
+}

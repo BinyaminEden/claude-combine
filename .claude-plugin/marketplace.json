@@ -1,0 +1,15 @@
+{
+  "name": "claude-combine",
+  "description": "Unified Claude Code plugin merging superpowers workflows with everything-claude-code productivity",
+  "owner": {
+    "name": "Eden Bi"
+  },
+  "plugins": [
+    {
+      "name": "claude-combine",
+      "description": "Unified Claude Code plugin merging superpowers workflows (TDD, debugging, planning) with everything-claude-code productivity (agents, learning, hooks, rules)",
+      "version": "1.0.0",
+      "source": "./"
+    }
+  ]
+}
