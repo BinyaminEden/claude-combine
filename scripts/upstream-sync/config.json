@@ -1,0 +1,85 @@
+{
+  "upstreams": [
+    {
+      "name": "superpowers",
+      "repo": "obra/superpowers",
+      "branch": "main",
+      "sync_mode": "full",
+      "directories": ["skills", "agents", "commands"]
+    },
+    {
+      "name": "everything-claude-code",
+      "repo": "affaan-m/everything-claude-code",
+      "branch": "main",
+      "sync_mode": "selective",
+      "mappings": {
+        "skills": [
+          "api-design",
+          "backend-patterns",
+          "coding-standards",
+          "content-engine",
+          "continuous-learning",
+          "continuous-learning-v2",
+          "crosspost",
+          "database-migrations",
+          "deep-research",
+          "deployment-patterns",
+          "docker-patterns",
+          "e2e-testing",
+          "frontend-patterns",
+          "investor-materials",
+          "java-coding-standards",
+          "jpa-patterns",
+          "mcp-server-patterns",
+          "postgres-patterns",
+          "prompt-optimizer",
+          "python-patterns",
+          "python-testing",
+          "security-review",
+          "security-scan",
+          "strategic-compact",
+          "team-builder"
+        ],
+        "agents": [
+          "architect.md",
+          "build-error-resolver.md",
+          "chief-of-staff.md",
+          "database-reviewer.md",
+          "doc-updater.md",
+          "e2e-runner.md",
+          "java-build-resolver.md",
+          "java-reviewer.md",
+          "loop-operator.md",
+          "python-reviewer.md",
+          "refactor-cleaner.md",
+          "security-reviewer.md"
+        ],
+        "commands": [
+          "build-fix.md",
+          "checkpoint.md",
+          "instinct-export.md",
+          "instinct-import.md",
+          "instinct-status.md",
+          "learn-eval.md",
+          "learn.md",
+          "prompt-optimize.md",
+          "resume-session.md",
+          "save-session.md",
+          "sessions.md",
+          "skill-create.md",
+          "skill-health.md",
+          "update-docs.md",
+          "verify.md"
+        ],
+        "rules": [
+          "common",
+          "python",
+          "typescript"
+        ]
+      }
+    }
+  ],
+  "overlap_priority": {
+    "agents/code-reviewer.md": "superpowers"
+  }
+}
