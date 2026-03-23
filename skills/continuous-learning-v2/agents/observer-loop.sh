@@ -114,7 +114,9 @@ PROMPT
   fi
 
   # Prevent observe.sh from recording this automated Haiku session as observations
-  ECC_SKIP_OBSERVE=1 ECC_HOOK_PROFILE=minimal claude --model haiku --max-turns "$max_turns" --print < "$prompt_file" >> "$LOG_FILE" 2>&1 &
+  ECC_SKIP_OBSERVE=1 ECC_HOOK_PROFILE=minimal claude --model haiku --max-turns "$max_turns" --print \
+    --allowedTools "Read,Write" \
+    < "$prompt_file" >> "$LOG_FILE" 2>&1 &
   claude_pid=$!
 
   (
@@ -170,6 +172,10 @@ trap on_usr1 USR1
 
 echo "$$" > "$PID_FILE"
 echo "[$(date)] Observer started for ${PROJECT_NAME} (PID: $$)" >> "$LOG_FILE"
+
+# Prune expired pending instincts before analysis
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+"${CLV2_PYTHON_CMD:-python3}" "${SCRIPT_DIR}/../scripts/instinct-cli.py" prune --quiet >> "$LOG_FILE" 2>&1 || echo "[$(date)] Warning: instinct prune failed (non-fatal)" >> "$LOG_FILE"
 
 while true; do
   sleep "$OBSERVER_INTERVAL_SECONDS" &
