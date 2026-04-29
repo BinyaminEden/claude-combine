@@ -83,6 +83,28 @@ exit_if_idle_without_sessions() {
   fi
 }
 
+wait_for_claude_analysis() {
+  local child_pid="$1"
+  local wait_status=0
+
+  while true; do
+    wait "$child_pid"
+    wait_status=$?
+
+    if [ "$wait_status" -eq 0 ]; then
+      return 0
+    fi
+
+    # SIGUSR1 can interrupt wait while the Claude child is still running.
+    # Re-wait in that case so a signal is not logged as a false child failure.
+    if kill -0 "$child_pid" 2>/dev/null; then
+      continue
+    fi
+
+    return "$wait_status"
+  done
+}
+
 analyze_observations() {
   if [ ! -f "$OBSERVATIONS_FILE" ]; then
     return
@@ -169,6 +191,18 @@ Rules:
 - Examples of project patterns: use React functional components, follow Django REST framework conventions
 PROMPT
 
+  # Read the prompt into memory before the Claude subprocess is spawned.
+  # On Windows/MSYS2, the mktemp path can differ from the shell's later path
+  # resolution, so relying on cat "$prompt_file" inside the claude invocation
+  # can fail even though the file was created successfully.
+  prompt_content="$(cat "$prompt_file" 2>/dev/null || true)"
+  rm -f "$prompt_file"
+  if [ -z "$prompt_content" ]; then
+    echo "[$(date)] Failed to load observer prompt content, skipping analysis" >> "$LOG_FILE"
+    rm -f "$analysis_file"
+    return
+  fi
+
   timeout_seconds="${ECC_OBSERVER_TIMEOUT_SECONDS:-120}"
   max_turns="${ECC_OBSERVER_MAX_TURNS:-20}"
   exit_code=0
@@ -185,17 +219,16 @@ PROMPT
 
   # Ensure CWD is PROJECT_DIR so the relative analysis_relpath resolves correctly
   # on all platforms, not just when the observer happens to be launched from the project root.
-  cd "$PROJECT_DIR" || { echo "[$(date)] Failed to cd to PROJECT_DIR ($PROJECT_DIR), skipping analysis" >> "$LOG_FILE"; rm -f "$prompt_file" "$analysis_file"; return; }
+  cd "$PROJECT_DIR" || { echo "[$(date)] Failed to cd to PROJECT_DIR ($PROJECT_DIR), skipping analysis" >> "$LOG_FILE"; rm -f "$analysis_file"; return; }
 
   # Prevent observe.sh from recording this automated Haiku session as observations.
   # Pass prompt via -p flag instead of stdin redirect for Windows compatibility (#842).
+  # prompt_content is already loaded in-memory so this no longer depends on the
+  # mktemp absolute path continuing to resolve after cwd changes (#1296).
   ECC_SKIP_OBSERVE=1 ECC_HOOK_PROFILE=minimal claude --model haiku --max-turns "$max_turns" --print \
     --allowedTools "Read,Write" \
-    -p "$(cat "$prompt_file")" >> "$LOG_FILE" 2>&1 &
+    -p "$prompt_content" >> "$LOG_FILE" 2>&1 &
   claude_pid=$!
-  # prompt_file content was already expanded by the shell; remove early to avoid
-  # leaving stale temp files during the (potentially long) analysis window.
-  rm -f "$prompt_file"
 
   (
     sleep "$timeout_seconds"
@@ -206,7 +239,7 @@ PROMPT
   ) &
   watchdog_pid=$!
 
-  wait "$claude_pid"
+  wait_for_claude_analysis "$claude_pid"
   exit_code=$?
   kill "$watchdog_pid" 2>/dev/null || true
   rm -f "$analysis_file"
