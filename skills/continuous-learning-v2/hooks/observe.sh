@@ -12,8 +12,20 @@
 
 set -e
 
-# Hook phase from CLI argument: "pre" (PreToolUse) or "post" (PostToolUse)
-HOOK_PHASE="${1:-post}"
+# Hook phase from CLI argument: "pre" (PreToolUse) or "post" (PostToolUse).
+# Manual settings.json installs can call this script without the plugin
+# wrapper's positional phase argument, but Claude Code still exposes the hook
+# event name in CLAUDE_HOOK_EVENT_NAME.  Fall back to that env var before
+# defaulting to post so manually registered PreToolUse hooks are recorded as
+# tool_start instead of being silently misclassified as tool_complete.
+HOOK_PHASE="${1:-}"
+if [ -z "$HOOK_PHASE" ]; then
+  case "${CLAUDE_HOOK_EVENT_NAME:-}" in
+    PreToolUse|pretooluse|pre_tool_use|pre) HOOK_PHASE="pre" ;;
+    PostToolUse|posttooluse|post_tool_use|post) HOOK_PHASE="post" ;;
+    *) HOOK_PHASE="post" ;;
+  esac
+fi
 
 # ─────────────────────────────────────────────
 # Read stdin first (before project detection)
@@ -115,7 +127,9 @@ fi
 # Sourcing detect-project.sh creates project-scoped directories and updates
 # projects.json, so automated sessions must return before that point.
 
-CONFIG_DIR="${HOME}/.claude/homunculus"
+# shellcheck disable=SC1091
+. "$(dirname "$0")/../scripts/lib/homunculus-dir.sh"
+CONFIG_DIR="$(_ecc_resolve_homunculus_dir)"
 
 # Skip if disabled (check both default and CLV2_CONFIG-derived locations)
 if [ -f "$CONFIG_DIR/disabled" ]; then
@@ -344,10 +358,12 @@ if [ -f "${CONFIG_DIR}/disabled" ]; then
   OBSERVER_ENABLED=false
 else
   OBSERVER_ENABLED=false
-  CONFIG_FILE="${SKILL_ROOT}/config.json"
-  # Allow CLV2_CONFIG override
   if [ -n "${CLV2_CONFIG:-}" ]; then
     CONFIG_FILE="$CLV2_CONFIG"
+  elif [ -f "${CONFIG_DIR}/config.json" ]; then
+    CONFIG_FILE="${CONFIG_DIR}/config.json"
+  else
+    CONFIG_FILE="${SKILL_ROOT}/config.json"
   fi
   # Use effective config path for both existence check and reading
   EFFECTIVE_CONFIG="$CONFIG_FILE"
