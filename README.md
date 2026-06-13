@@ -1,3 +1,5 @@
+[![Sponsor](https://readme.cash/i/d2tpip0kr9.svg)](https://readme.cash/c/d2tpip0kr9)
+
 # claude-combine
 
 A unified Claude Code plugin that merges the best of two community projects:
